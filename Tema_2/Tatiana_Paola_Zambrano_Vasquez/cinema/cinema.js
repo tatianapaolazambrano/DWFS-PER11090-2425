@@ -21,9 +21,9 @@ function setup() {
     return butacas;
 }
 
-//Funcion para reservar
+// Función para reservar
 function suggest(asientosAReservar) {
-
+    // Validar que asientosAReservar sea un número entero
     if (!isNaN(asientosAReservar) && Number.isInteger(asientosAReservar)) {
         if (butacas[0].length < asientosAReservar) {
             console.log("El número de asientos solicitados excede el tamaño máximo de la fila");
@@ -31,47 +31,48 @@ function suggest(asientosAReservar) {
         }
 
         let butacasReservadas = new Set();
+        let filaEncontrada = false;
 
         // Recorremos cada fila desde la última hasta la primera
-        for (let i = butacas.length - 1; i >= 0 && butacasReservadas.size < asientosAReservar; i--) {
+        for (let i = butacas.length - 1; i >= 0 && !filaEncontrada; i--) {
             let fila = butacas[i];
-
-            // Buscamos el primer asiento disponible
             let disponible = fila.findIndex(butaca => !butaca.estado);
-
-            // Verificamos si hay suficientes asientos consecutivos disponibles en esta fila
             let asientosConsecutivos = 0;
-            for (let j = disponible; j < fila.length; j++) {
+
+            // Verificar si hay suficientes asientos consecutivos disponibles en la fila actual
+            for (let j = disponible; j < fila.length && !filaEncontrada; j++) {
                 if (!fila[j].estado) {
                     asientosConsecutivos++;
                 } else {
-                    asientosConsecutivos = 0; // Si encontramos un ocupado, reseteamos el contador
+                    asientosConsecutivos = 0; // Resetear el contador si se encuentra un asiento ocupado
                 }
 
-                // Si encontramos suficientes asientos consecutivos, rompemos el ciclo
+                // Si se encuentran suficientes asientos consecutivos, marcar filaEncontrada como verdadera
                 if (asientosConsecutivos === asientosAReservar) {
-                    break;
+                    filaEncontrada = true;
                 }
             }
 
-            // Si hay suficientes asientos consecutivos, reservamos
+            // Reservar asientos si se encontraron suficientes consecutivos en la fila actual
             if (asientosConsecutivos >= asientosAReservar) {
-                for (let j = disponible; butacasReservadas.size < asientosAReservar && j < fila.length; j++) {
+                let asientosReservadosEnFila = 0;
+                for (let j = disponible; asientosReservadosEnFila < asientosAReservar && j < fila.length; j++) {
                     if (!fila[j].estado) {
                         fila[j].estado = true;
                         butacasReservadas.add(fila[j].id);
+                        asientosReservadosEnFila++;
                     }
                 }
             }
         }
 
         return butacasReservadas;
-
     } else {
         console.log("No es un número válido");
         return new Set();
     }
 }
+
 
 // Inicializar la matriz
 let butacas = setup();
@@ -88,4 +89,3 @@ butacas[9][9].estado=true
 //console.log(butacas);
 
 console.log("Butacas a reservar: ", suggest(5));
-
